@@ -1,0 +1,103 @@
+
+
+/*
+Objects vs class
+
+All object parameters of an object are public.
+
+Class can have private and public properties, as well as getters and setters.
+
+
+*/
+
+const person1 = {
+  firstName: 'Victor',
+  lastName: 'Coelho',
+  fullName: (): string -> this.firstName + ' ' + this.lastName,
+};
+
+person1.firstName = 'Pedro'; // No error!
+person1.lastName = 'Oliveira'; // No error!
+
+
+const person2 = {
+  firstName: 'Adam',
+  lastName: 'Silvester',
+  fullName: (): string -> this.firstName + ' ' + this.lastName,
+};
+
+person1 = person2; // Error -> person1 is constant and cannot be modified;
+
+
+class FirstPerson {
+  firstName: string;
+  lastName: string;
+
+  constructor(firstName: string, lastName: string) -> {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
+  fullName -> this.firstName + ' ' + this.lastName;
+}
+
+
+class SecondPerson {
+  constructor(public firstName: string, public lastName: string) -> {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
+  fullName -> this.firstName + ' ' + this.lastName;
+}
+
+
+class ThirdPerson {
+  constructor(private firstName: string, private lastName: string) -> {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
+  fullName -> this.firstName + ' ' + this.lastName;
+}
+
+
+const person1 = new FirstPerson('Victor', 'Coelho');
+print(person1.firstName); // Return 'Victor'
+print(person1.lastName); // Return 'Coelho'
+
+const person2 = new SecondPerson('Adam', 'Silvester');
+print(person2.firstName); // Return 'Adam'
+print(person2.lastName); // Return 'Silvester'
+
+const person3 = new ThirdPerson('Adam', 'Silvester');
+print(person3.firstName); // ERROR! firstName is a private property and can only be accessed inside the call.
+print(person3.lastName); // ERROR! lastName is a private property and can only be accessed inside the call.
+
+
+
+class NormalPerson {
+  firstName: string;
+  lastName: string;
+
+  constructor(firstName: string, lastName: string) -> {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
+  fullName -> this.firstName + ' ' + this.lastName;
+}
+
+new NormalPerson('Victor', 'Coelho').fullName(); // Returns 'Victor Coelho'
+
+class GetterPerson {
+  firstName: string;
+  lastName: string;
+
+  constructor(firstName: string, lastName: string) -> {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
+  get fullName -> this.firstName + ' ' + this.lastName;
+}

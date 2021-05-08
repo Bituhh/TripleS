@@ -1,0 +1,3 @@
+D:/usr/Victor/Documents/Projects/Cpp/triples/cmake-build-debug/CMakeFiles/triples.dir
+D:/usr/Victor/Documents/Projects/Cpp/triples/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/usr/Victor/Documents/Projects/Cpp/triples/cmake-build-debug/CMakeFiles/rebuild_cache.dir

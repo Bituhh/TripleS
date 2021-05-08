@@ -1,0 +1,60 @@
+/*
+
+True function definition is just '->'.
+
+Parameter brackets are optional for any definition except function with return types.
+
+*/
+
+
+// Named Function
+functionName -> {
+  return 1 + 1;
+}
+
+// Named Single Line  Function
+functionName -> 1 + 1;
+
+// Named Parameterized Function
+functionName(param1, param2) -> {
+  return param1 + param2;
+}
+
+// Named Single Line Parameterized Function
+functionName(param1, param2) -> param1 + param2; // return is implied
+
+
+
+// Anonymous Multi Line function
+-> {
+  return 1 + 1;
+}
+
+() -> {
+  return 1 + 1;
+}
+
+
+// Anonymous Parameterized Function
+(param1, param2) -> {
+  return param1 + param2;
+}
+
+// Anonymous Single Line Function
+-> 1 + 1;
+() -> 1 + 1;
+
+// Anonymous Single Line Parameterized Function
+(param1, param2) -> param1 + param2;
+
+
+-- Proposed
+  // Anonymous Function with Return Type
+  (): boolean -> true;
+
+  // Named Function with Return Type
+  functionName: boolean -> true;
+  functionName(): boolean -> true;
+
+  // Named Function Parameterized with Parameter types
+  functionName(param1: number, param2: number): boolean -> param1 == param2;

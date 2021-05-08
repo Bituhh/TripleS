@@ -1,0 +1,81 @@
+// CONCATENATING
+'1234' + '5678'; // Return '12345678'.
+'1234'.join('5678'); // Return '12345678'.
+'1234'.join('5678', '90'); // Return '1234567890'.
+'1234'.concat('5678'); // Return '12345678'.
+'1234'.concat('5678', '90'); // Return '1234567890'.
+'1234'.concatenate('5678'); // Return '12345678'.
+'1234'.concatenate('5678', '90'); // Return '1234567890'.
+String.join('123', '456'); // Return '123456'.
+String.join('123', '456', '789'); // Return '123456789',
+
+// INDEXING
+'123456789'[0]; // Returns '1'.
+'123456789'[-1]; // Returns '9'.
+'123456789'[0:0]; // Returns '1'.
+'123456789'[0:1]; // Returns '12'.
+
+// SLICING
+// First index if empty defaults to first index.
+'123456789'[:1]; // Returns '12'.
+'123456789'[:3]; // Returns '1234'.
+'123456789'[:3]; // Returns '1234'.
+
+// Second index if empty defaults to last index.
+'123456789'[1:]; // Returns '23456789'.
+'123456789'[5:]; // Returns '6789'.
+
+// Negative index.
+'123456789'[5:-2]; // Returns '678'.
+'123456789'[2:-2]; // Returns '345678'.
+
+// Slicing with function -> Notice that first parameter is start index and second parameter is length and not index.
+'123456789'.slice(0, 3); // Returns '123'.
+'123456789'.slice(3, 5); // Returns '45678'.
+
+'123456789'.slice(0, -3); // ERROR! negative length is not valid.
+'123456789'.slice(-2, 3); // Returns '678'.
+
+// CONVERSIONS
+'1234'.toNumber(); // Returns 1234 as a number.
+'Some string'.toNumber(); // ERROR! unable to convert string to number.
+'23/03/2011'.toDate(); // Returns Date object.
+'Some string'.toDate(); // ERROR! unable to convert string to number.
+
+// PADDING
+'2'.padStart(2, '0'); // Returns '02'.
+'256'.padStart(2, '0'); // Returns '25'.
+'256'.padStart(5, '0'); // Returns '00256'.
+'25689'.padStart(5, '0'); // Returns '25689'.
+
+'2'.padEnd(2, '0'); // Returns '20'.
+'256'.padEnd(2, '0'); // Returns '25'.
+'256'.padEnd(5, '0'); // Returns '25600'.
+'25689'.padEnd(5, '0'); // Returns '25689'.
+'25689'.padEnd(3, '0'); // Returns '256'.
+
+// Case Conversion
+'victor'.toUpperCase(); // Returns 'VICTOR'.
+'VICTOR'.toLowerCase(); // Returns 'victor'.
+'victor coelho'.toProperCase(); // Returns 'Victor Coelho'.
+'victor coelho'.toTitleCase(); // Returns 'Victor Coelho'.
+'victor coelho'.toSentenceCase(); // Returns 'Victor coelho'.
+'victor coelho'.toSnakeCase(); // Returns 'victor_coelho'.
+'Victor Coelho'.toSnakeCase(); // Returns 'Victor_Coelho'.
+'victor coelho'.toHyphenCase(); // Returns 'victor-coelho'.
+'Victor Coelho'.toHyphenCase(); // Returns 'Victor-Coelho'.
+'victor coelho'.toCamelCase(); // Returns 'VictorCoelho'.
+'victorcoelho'.toCamelCase(); // Returns 'Victorcoelho' =>  Does NOT distinguish language.
+
+'    Victor Coelho'.trim(); // Returns 'Victor Coelho'.
+'Victor     Coelho'.trim(); // Returns 'Victor Coelho'.
+'Victor Coelho    '.trim(); // Returns 'Victor Coelho'.
+'  Victor Coelho  '.trim(); // Returns 'Victor Coelho'.
+
+
+// TO ARRAY
+'Victor Oliveira'.split(' '); // Returns ['Victor', 'Oliveira']
+'Victor  Oliveira'.split(' '); // Returns ['Victor', '', 'Oliveira']
+'Victor  Oliveira'.trim().split(' '); // Returns ['Victor', 'Oliveira']
+'Victor Oliveira'.split('o'); // Returns ['Vict', 'r Oliveira']
+'Victor Oliveira'.split(); // Returns ['V', 'i', 'c', 't', 'o', 'r', ' ', 'O', 'l', 'i', 'v', 'e', 'i', 'r', 'a'].

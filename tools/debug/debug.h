@@ -1,7 +1,3 @@
-//
-// Created by usr_admin on 28/04/2021.
-//
-
 #ifndef TRIPLES_DEBUG_H
 #define TRIPLES_DEBUG_H
 

@@ -1,7 +1,6 @@
 #include <cstdarg>
 #include "vm.h"
 
-
 VM::VM() {
   reset();
 }

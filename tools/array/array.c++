@@ -1,7 +1,3 @@
-//
-// Created by usr_admin on 28/04/2021.
-//
-
 #include "array.h"
 #include "../../interpreter/value/value.h"
 

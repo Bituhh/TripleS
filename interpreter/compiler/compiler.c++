@@ -1,7 +1,6 @@
 #include <cstdio>
 #include "compiler.h"
 
-
 Compiler::Compiler(const char *source) : scanner(new Scanner(source)), parser(Parser()), compilingChunk(new Chunk()) {
 }
 

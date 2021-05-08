@@ -1,7 +1,3 @@
-//
-// Created by usr_admin on 29/04/2021.
-//
-
 #include <cstring>
 #include "scanner.h"
 

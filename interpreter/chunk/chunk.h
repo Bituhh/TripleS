@@ -1,7 +1,6 @@
 #ifndef TRIPLES_CHUNK_H
 #define TRIPLES_CHUNK_H
 
-
 #include <cstdint>
 #include "../../tools/array/array.h"
 #include "../value/value.h"
@@ -33,7 +32,9 @@ public:
   Array<uint8_t> code;
 
   Chunk();
+
   void write(uint8_t byte, int line);
+
   int addConstant(Value value);
 };
 

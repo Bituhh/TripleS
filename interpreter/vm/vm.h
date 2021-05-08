@@ -1,7 +1,6 @@
 #ifndef TRIPLES_VM_H
 #define TRIPLES_VM_H
 
-
 #include "../chunk/chunk.h"
 #include "../../tools/debug/debug.h"
 #include "../compiler/compiler.h"

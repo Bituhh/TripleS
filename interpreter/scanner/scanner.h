@@ -1,7 +1,3 @@
-//
-// Created by usr_admin on 29/04/2021.
-//
-
 #ifndef TRIPLES_SCANNER_H
 #define TRIPLES_SCANNER_H
 

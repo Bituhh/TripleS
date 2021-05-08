@@ -1,7 +1,3 @@
-//
-// Created by usr_admin on 28/04/2021.
-//
-
 #include "memory.h"
 
 void *Memory::reallocate(void *pointer, size_t oldSize, size_t newSize) {

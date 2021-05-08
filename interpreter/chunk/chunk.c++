@@ -1,7 +1,3 @@
-//
-// Created by usr_admin on 28/04/2021.
-//
-
 #include "chunk.h"
 
 Chunk::Chunk() : constants(ValueArray()), code(Array<uint8_t>()), lines(Array<int>()) {

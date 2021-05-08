@@ -1,3 +1,0 @@
-C:\Users\Victor\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\211.7142.21\bin\cmake\win\bin\cmake.exe -E rm -f CMakeFiles\triples.dir/objects.a
-C:\PROGRA~1\MinGW\bin\ar.exe cr CMakeFiles\triples.dir/objects.a @CMakeFiles\triples.dir\objects1.rsp
-C:\PROGRA~1\MinGW\bin\G__~1.EXE -g -Wl,--whole-archive CMakeFiles\triples.dir/objects.a -Wl,--no-whole-archive -o triples.exe -Wl,--out-implib,libtriples.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\triples.dir\linklibs.rsp

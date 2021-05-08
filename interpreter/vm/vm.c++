@@ -1,12 +1,27 @@
 #include <cstdarg>
+#include <cstring>
 #include "vm.h"
 
-VM::VM() {
+VM VM::instance;
+
+VM::VM() : chunk(new Chunk), instructionPointer(), stack(), stackTop(), objects(nullptr) {
   reset();
 }
 
-VM::~VM() {
-};
+void VM::free() {
+  delete chunk;
+  delete stackTop;
+  {
+    Object *object = objects;
+    while (object != nullptr) {
+      Object *next = object->next;
+      delete object;
+      object = next;
+    }
+  }
+  delete objects;
+  delete instructionPointer;
+}
 
 InterpretResult VM::interpret(const char *source) {
   auto *lChunk = new Chunk();
@@ -19,7 +34,7 @@ InterpretResult VM::interpret(const char *source) {
   }
 
   chunk = lChunk;
-  instructionPointer = chunk->code.values;
+  instructionPointer = chunk->code.data();
 
   InterpretResult result = run();
 
@@ -30,7 +45,7 @@ InterpretResult VM::interpret(const char *source) {
 
 InterpretResult VM::run() {
 #define READ_BYTE()     *instructionPointer++
-#define READ_CONSTANT() (chunk->constants.values[READ_BYTE()])
+#define READ_CONSTANT() (chunk->constants.at(READ_BYTE()))
 #define BINARY_OP(valueType, op)   do { \
     if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
       runtimeError("Operands must be numbers."); \
@@ -54,59 +69,57 @@ InterpretResult VM::run() {
 
     Debug::disassembleInstruction(chunk, (int) (instructionPointer - chunk->code.values));
 #endif
-    uint8_t instruction;
-    switch (instruction = READ_BYTE()) {
+    switch (READ_BYTE()) {
       case OP_CONSTANT: {
         Value constant = READ_CONSTANT();
         push(constant);
         break;
       }
-      case OP_NULL:
-        push(NULL_VAL);
+      case OP_NULL:push(NULL_VAL);
         break;
-      case OP_TRUE:
-        push(BOOL_VAL(true));
+      case OP_TRUE:push(BOOL_VAL(true));
         break;
-      case OP_FALSE:
-        push(BOOL_VAL(false));
+      case OP_FALSE:push(BOOL_VAL(false));
         break;
       case OP_EQUAL: {
         Value b = pop();
         Value a = pop();
-        push(BOOL_VAL(valuesEqual(a, b)));
+        push(BOOL_VAL(ValueArray::valuesEqual(a, b)));
         break;
       }
-      case OP_GREATER:
-        BINARY_OP(BOOL_VAL, >);
+      case OP_GREATER:BINARY_OP(BOOL_VAL, >);
         break;
-      case OP_GREATER_EQUAL:
-        BINARY_OP(BOOL_VAL, >=);
+      case OP_GREATER_EQUAL:BINARY_OP(BOOL_VAL, >=);
         break;
-      case OP_LESS:
-        BINARY_OP(BOOL_VAL, <);
+      case OP_LESS:BINARY_OP(BOOL_VAL, <);
         break;
-      case OP_LESS_EQUAL:
-        BINARY_OP(BOOL_VAL, <=);
+      case OP_LESS_EQUAL:BINARY_OP(BOOL_VAL, <=);
         break;
-      case OP_ADD:
-        BINARY_OP(NUMBER_VAL, +);
+      case OP_ADD: {
+        if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+          concatenate();
+        } else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
+          double b = AS_NUMBER(pop());
+          double a = AS_NUMBER(pop());
+          push(NUMBER_VAL(a + b));
+        } else {
+          runtimeError("Operands must be either strings or numbers.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
         break;
-      case OP_SUBTRACT:
-        BINARY_OP(NUMBER_VAL, -);
+      }
+      case OP_SUBTRACT:BINARY_OP(NUMBER_VAL, -);
         break;
-      case OP_MULTIPLE:
-        BINARY_OP(NUMBER_VAL, *);
+      case OP_MULTIPLE:BINARY_OP(NUMBER_VAL, *);
         break;
-      case OP_DIVIDE:
-        BINARY_OP(NUMBER_VAL, /);
+      case OP_DIVIDE:BINARY_OP(NUMBER_VAL, /);
         break;
-      case OP_NOT:
-        push(BOOL_VAL(isFalsy(pop())));
+      case OP_NOT:push(BOOL_VAL(isFalsy(pop())));
         break;
       case OP_NOT_EQUAL: {
         Value b = pop();
         Value a = pop();
-        push(BOOL_VAL(!valuesEqual(a, b)));
+        push(BOOL_VAL(!ValueArray::valuesEqual(a, b)));
         break;
       }
       case OP_NEGATE:
@@ -154,8 +167,8 @@ void VM::runtimeError(const char *format, ...) {
   va_end(args);
   fputs("\n", stderr);
 
-  size_t instruction = instructionPointer - chunk->code.values - 1;
-  int line = chunk->lines.values[instruction];
+  size_t instruction = instructionPointer - chunk->code.data() - 1;
+  int line = chunk->lines.at(instruction);
   fprintf(stderr, "[line %d] in script\n", line);
   reset();
 }
@@ -164,16 +177,16 @@ bool VM::isFalsy(Value value) {
   return IS_NULL(value) || (IS_BOOL(value) && !AS_BOOL(value)) || (IS_NUMBER(value) && AS_NUMBER(value) == 0);
 }
 
-bool VM::valuesEqual(Value a, Value b) {
-  if (a.type != b.type) return false;
-  switch (a.type) {
-    case VAL_BOOL:
-      return AS_BOOL(a) == AS_BOOL(b);
-    case VAL_NULL:
-      return true;
-    case VAL_NUMBER:
-      return AS_NUMBER(a) == AS_NUMBER(b);
-    default:
-      return false; // Unreachable;
-  }
+void VM::concatenate() {
+  ObjectString *b = AS_STRING(pop());
+  ObjectString *a = AS_STRING(pop());
+
+  int length = a->length + b->length;
+  char *chars = new char[length + 1];
+  memcpy(chars, a->chars, a->length);
+  memcpy(chars + a->length, b->chars, b->length);
+  chars[length] = '\0';
+
+  ObjectString *result = ObjectString::takeString(chars, length);
+  push(OBJ_VAL(result));
 }

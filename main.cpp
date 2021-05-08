@@ -1,10 +1,9 @@
-#include <iostream>
 #include "interpreter/chunk/chunk.h"
 #include "tools/debug/debug.h"
 #include "interpreter/vm/vm.h"
 
 static void repl() {
-  auto vm = new VM;
+  auto &vm = VM::getInstance();
 
   char line[1024];
   for (;;) {
@@ -15,10 +14,10 @@ static void repl() {
       break;
     }
 
-    vm->interpret(line);
+    vm.interpret(line);
   }
 
-  delete vm;
+  vm.free();
 }
 
 static char *readFile(const char *path) {
@@ -41,16 +40,16 @@ static char *readFile(const char *path) {
 }
 
 static void runFile(const char *path) {
-  auto vm = new VM;
+  auto &vm = VM::getInstance();
 
   char *source = readFile(path);
-  InterpretResult result = vm->interpret(source);
+  InterpretResult result = vm.interpret(source);
   free(source);
 
   if (result == INTERPRET_COMPILE_ERROR) exit(65);
   if (result == INTERPRET_RUNTIME_ERROR) exit(70);
 
-  delete vm;
+  vm.free();
 }
 
 int main(int argc, const char *argv[]) {

@@ -2,7 +2,7 @@
 #define TRIPLES_CHUNK_H
 
 #include <cstdint>
-#include "../../tools/array/array.h"
+#include <vector>
 #include "../value/value.h"
 
 typedef enum {
@@ -28,14 +28,14 @@ typedef enum {
 class Chunk {
 public:
   ValueArray constants;
-  Array<int> lines;
-  Array<uint8_t> code;
+  std::vector<int> lines;
+  std::vector<uint8_t> code;
 
   Chunk();
 
   void write(uint8_t byte, int line);
 
-  int addConstant(Value value);
+  unsigned int addConstant(Value value);
 };
 
 

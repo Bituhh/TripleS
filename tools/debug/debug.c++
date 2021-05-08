@@ -3,20 +3,20 @@
 void Debug::disassembleChunk(Chunk *chunk, const char *name) {
   printf("== %s ==\n", name);
 
-  for (int offset = 0; offset < chunk->code.length;) {
+  for (int offset = 0; offset < chunk->code.size();) {
     offset = Debug::disassembleInstruction(chunk, offset);
   }
 }
 
 int Debug::disassembleInstruction(Chunk *chunk, int offset) {
   printf("%04d ", offset);
-  if (offset > 0 && chunk->lines.values[offset] == chunk->lines.values[offset - 1]) {
+  if (offset > 0 && chunk->lines.at(offset) == chunk->lines.at(offset - 1)) {
     printf("   | ");
   } else {
-    printf("%4d ", chunk->lines.values[offset]);
+    printf("%4d ", chunk->lines.at(offset));
   }
 
-  uint8_t instruction = chunk->code.values[offset];
+  uint8_t instruction = chunk->code.at(offset);
   switch (instruction) {
     case OP_CONSTANT:
       return Debug::constantInstruction("OP_CONSTANT", chunk, offset);
@@ -64,9 +64,9 @@ int Debug::simpleInstruction(const char *name, int offset) {
 }
 
 int Debug::constantInstruction(const char *name, Chunk *chunk, int offset) {
-  uint8_t constant = chunk->code.values[offset + 1];
+  uint8_t constant = chunk->code.at(offset + 1);
   printf("%-16s %4d '", name, constant);
-  ValueArray::print(chunk->constants.values[constant]);
+  ValueArray::print(chunk->constants.at(constant));
   printf("'\n");
   return offset + 2;
 }

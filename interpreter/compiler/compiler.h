@@ -1,8 +1,12 @@
 #ifndef TRIPLES_COMPILER_H
 #define TRIPLES_COMPILER_H
 
+#include <cstdio>
+#include <cstdlib>
+
 #include "../scanner/scanner.h"
 #include "../chunk/chunk.h"
+#include "../object/objectString/objectString.h"
 #include "../../tools/debug/debug.h"
 
 typedef struct {
@@ -33,71 +37,49 @@ typedef enum {
   PARSER_FN_NUMBER,
   PARSER_FN_GROUPING,
   PARSER_FN_LITERAL,
+  PARSER_FN_STRING,
 } ParserFnType;
 
 class ParserRule {
-public:
+ public:
   ParserFnType prefix;
   ParserFnType infix;
   Precedence precedence;
 };
 
-
 class Compiler {
-private:
+ private:
   Parser parser;
   Scanner *scanner;
   Chunk *compilingChunk;
 
   void advance();
-
   void expression();
-
   void consume(TokenType type, const char *message);
-
   void errorAtCurrent(const char *start);
-
   void errorAt(Token *token, const char *message);
-
   Chunk *currentChunk();
-
   void emitByte(uint8_t byte);
-
   void emitBytes(uint8_t byte1, uint8_t byte2);
-
   void emitReturn();
-
   void end();
-
   void number();
-
   void emitConstant(Value value);
-
   uint8_t makeConstant(Value value);
-
   void error(const char *message);
-
   void grouping();
-
   void unary();
-
   void binary();
-
   void parsePrecedence(Precedence precedence);
-
   static ParserRule *getRule(TokenType type);
-
   void handleRule(ParserFnType type);
-
   void literal();
 
-public:
+ public:
   explicit Compiler(const char *source);
-
   ~Compiler();
-
   bool compile(Chunk *chunk);
+  void string();
 };
-
 
 #endif //TRIPLES_COMPILER_H

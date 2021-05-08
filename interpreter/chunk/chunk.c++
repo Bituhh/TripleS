@@ -1,14 +1,14 @@
 #include "chunk.h"
 
-Chunk::Chunk() : constants(ValueArray()), code(Array<uint8_t>()), lines(Array<int>()) {
-};
-
-void Chunk::write(uint8_t byte, int line) {
-  code.write(byte);
-  lines.write(line);
+Chunk::Chunk() : constants(ValueArray()), code(std::vector<uint8_t>()), lines(std::vector<int>()) {
 }
 
-int Chunk::addConstant(Value value) {
-  constants.write(value);
-  return constants.length - 1;
+void Chunk::write(uint8_t byte, int line) {
+  code.push_back(byte);
+  lines.push_back(line);
+}
+
+unsigned int Chunk::addConstant(Value value) {
+  constants.push_back(value);
+  return constants.size() - 1;
 }

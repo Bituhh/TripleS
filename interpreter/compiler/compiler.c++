@@ -1,7 +1,6 @@
-#include <cstdio>
 #include "compiler.h"
 
-Compiler::Compiler(const char *source) : scanner(new Scanner(source)), parser(Parser()), compilingChunk(new Chunk()) {
+Compiler::Compiler(const char *source) : scanner(new Scanner(source)), parser(), compilingChunk() {
 }
 
 Compiler::~Compiler() {
@@ -157,6 +156,12 @@ void Compiler::literal() {
 }
 // Literal
 
+// String
+void Compiler::string() {
+  emitConstant(OBJ_VAL(ObjectString::copy(parser.previous.start + 1, parser.previous.length - 2)));
+}
+// String
+
 void Compiler::parsePrecedence(Precedence precedence) {
   advance();
   ParserFnType prefixRuleType = getRule(parser.previous.type)->prefix;
@@ -268,7 +273,7 @@ ParserRule *Compiler::getRule(TokenType type) {
     case TOKEN_IDENTIFIER:
       return new ParserRule{.prefix = PARSER_FN_NONE, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
     case TOKEN_STRING:
-      return new ParserRule{.prefix = PARSER_FN_NONE, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
+      return new ParserRule{.prefix = PARSER_FN_STRING, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
     case TOKEN_NUMBER:
       return new ParserRule{.prefix = PARSER_FN_NUMBER, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
     case TOKEN_AND:
@@ -328,6 +333,9 @@ void Compiler::handleRule(ParserFnType type) {
       break;
     case PARSER_FN_LITERAL:
       literal();
+      break;
+    case PARSER_FN_STRING:
+      string();
       break;
     default:
       break;

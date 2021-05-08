@@ -2,8 +2,9 @@
 #define TRIPLES_VALUE_H
 
 #include <cstdio>
-#include "../../tools/array/array.h"
-#include "../object/object.h"
+#include <vector>
+
+typedef class Object Object;
 
 typedef enum {
   VAL_BOOL,
@@ -17,7 +18,7 @@ typedef struct {
   union {
     bool boolean;
     double number;
-    Obj *obj;
+    Object *obj;
   } as;
 } Value;
 
@@ -33,11 +34,12 @@ typedef struct {
 #define BOOL_VAL(value)   ((Value){VAL_BOOL, {.boolean = (value)}})
 #define NULL_VAL          ((Value){VAL_NULL, {.number = 0}})
 #define NUMBER_VAL(value) ((Value){VAL_NUMBER, {.number = (value)}})
-#define OBJ_VAL(object)   ((Value){VAL_OBJ, {.obj = (Obj *)(object)}})
+#define OBJ_VAL(object)   ((Value){VAL_OBJ, {.obj = (Object *)(object)}})
 
-class ValueArray : public Array<Value> {
+class ValueArray : public std::vector<Value> {
 public:
   static void print(Value value);
+  static bool valuesEqual(Value a, Value b);
 };
 
 

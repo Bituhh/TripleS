@@ -7,14 +7,21 @@
 
 typedef enum {
   OBJ_STRING,
-} ObjType;
+} ObjectType;
 
-class Obj {
-private:
-  ObjType type;
-public:
-  static inline bool isObjType(Value value, ObjType type);
+class Object {
+ private:
+  ObjectType type;
+ public:
+  Object *next;
+
+  explicit Object(ObjectType type);
+
+  ~Object();
+
+  static bool isObjType(Value value, ObjectType type);
+
+  static void print(Value value);
 };
-
 
 #endif //TRIPLES_OBJECT_H

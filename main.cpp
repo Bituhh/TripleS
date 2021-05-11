@@ -54,11 +54,13 @@ static void runFile(const char *path) {
 
 int main(int argc, const char *argv[]) {
 
-  if (argc == 1) {
-    repl();
-  } else {
-    runFile(argv[1]);
-  }
+//  if (argc == 1) {
+//    repl();
+//  } else {
+//    runFile(argv[1]);
+//  }
+
+  runFile("D:/usr/Victor/Documents/Projects/Cpp/triples/definitions/test.sss");
 
   return 0;
 }

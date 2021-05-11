@@ -12,15 +12,12 @@ typedef enum {
 class Object {
  private:
   ObjectType type;
+
  public:
   Object *next;
-
   explicit Object(ObjectType type);
-
   ~Object();
-
   static bool isObjType(Value value, ObjectType type);
-
   static void print(Value value);
 };
 

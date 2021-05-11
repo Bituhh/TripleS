@@ -1,6 +1,7 @@
 #ifndef TRIPLES_VM_H
 #define TRIPLES_VM_H
 
+#include <unordered_map>
 #include "../chunk/chunk.h"
 #include "../../tools/debug/debug.h"
 #include "../compiler/compiler.h"
@@ -19,9 +20,9 @@ class VM {
   uint8_t *instructionPointer;
   Value stack[MAX_STACK];
   Value *stackTop;
-  static VM instance;
 
   VM();
+  static VM instance;
   InterpretResult run();
   void reset();
   void push(Value value);
@@ -33,6 +34,7 @@ class VM {
 
  public:
   Object *objects;
+  std::unordered_map<std::string , ObjectString *> strings;
 
   VM(const VM &) = delete;
   void free();

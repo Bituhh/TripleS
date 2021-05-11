@@ -53,33 +53,43 @@ class Compiler {
   Scanner *scanner;
   Chunk *compilingChunk;
 
-  void advance();
-  void expression();
-  void consume(TokenType type, const char *message);
-  void errorAtCurrent(const char *start);
-  void errorAt(Token *token, const char *message);
   Chunk *currentChunk();
-  void emitByte(uint8_t byte);
-  void emitBytes(uint8_t byte1, uint8_t byte2);
-  void emitReturn();
-  void end();
+
+  void declaration();
+  void statement();
+
+  void expression();
   void number();
-  void emitConstant(Value value);
-  uint8_t makeConstant(Value value);
-  void error(const char *message);
   void grouping();
   void unary();
   void binary();
+  void string();
+
   void parsePrecedence(Precedence precedence);
   static ParserRule *getRule(TokenType type);
   void handleRule(ParserFnType type);
   void literal();
+  bool match(TokenType type);
+  bool check(TokenType type);
+
+  void errorAtCurrent(const char *start);
+  void errorAt(Token *token, const char *message);
+  void error(const char *message);
+
+  void advance();
+  void consume(TokenType type, const char *message);
+  void emitByte(uint8_t byte);
+  void emitBytes(uint8_t byte1, uint8_t byte2);
+  void emitReturn();
+  uint8_t makeConstant(Value value);
+  void emitConstant(Value value);
+  void printStatement();
+  void end();
 
  public:
   explicit Compiler(const char *source);
   ~Compiler();
   bool compile(Chunk *chunk);
-  void string();
 };
 
 #endif //TRIPLES_COMPILER_H

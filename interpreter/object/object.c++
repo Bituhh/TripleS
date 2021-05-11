@@ -12,8 +12,8 @@ Object::~Object() {
   switch (type) {
     case OBJ_STRING: {
       auto *string = (ObjectString *) this;
-      delete[] string->chars;
-      delete this;
+      string->chars.clear();
+      string->chars.shrink_to_fit();
       break;
     }
   }
@@ -26,7 +26,7 @@ bool Object::isObjType(Value value, ObjectType type) {
 void Object::print(Value value) {
   switch (OBJ_TYPE(value)) {
     case OBJ_STRING:
-      printf("%s", AS_CSTRING(value));
+      printf("%s", AS_CSTRING(value).c_str());
       break;
   }
 }

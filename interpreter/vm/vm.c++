@@ -4,7 +4,7 @@
 
 VM VM::instance;
 
-VM::VM() : chunk(new Chunk), instructionPointer(), stack(), stackTop(), objects(nullptr) {
+VM::VM() : chunk(new Chunk), instructionPointer(), stack(), stackTop(), objects(nullptr), strings() {
   reset();
 }
 
@@ -21,6 +21,7 @@ void VM::free() {
   }
   delete objects;
   delete instructionPointer;
+  strings.clear();
 }
 
 InterpretResult VM::interpret(const char *source) {
@@ -75,11 +76,11 @@ InterpretResult VM::run() {
         push(constant);
         break;
       }
-      case OP_NULL:push(NULL_VAL);
+      case OP_NULL: push(NULL_VAL);
         break;
-      case OP_TRUE:push(BOOL_VAL(true));
+      case OP_TRUE: push(BOOL_VAL(true));
         break;
-      case OP_FALSE:push(BOOL_VAL(false));
+      case OP_FALSE: push(BOOL_VAL(false));
         break;
       case OP_EQUAL: {
         Value b = pop();
@@ -87,13 +88,13 @@ InterpretResult VM::run() {
         push(BOOL_VAL(ValueArray::valuesEqual(a, b)));
         break;
       }
-      case OP_GREATER:BINARY_OP(BOOL_VAL, >);
+      case OP_GREATER: BINARY_OP(BOOL_VAL, >);
         break;
-      case OP_GREATER_EQUAL:BINARY_OP(BOOL_VAL, >=);
+      case OP_GREATER_EQUAL: BINARY_OP(BOOL_VAL, >=);
         break;
-      case OP_LESS:BINARY_OP(BOOL_VAL, <);
+      case OP_LESS: BINARY_OP(BOOL_VAL, <);
         break;
-      case OP_LESS_EQUAL:BINARY_OP(BOOL_VAL, <=);
+      case OP_LESS_EQUAL: BINARY_OP(BOOL_VAL, <=);
         break;
       case OP_ADD: {
         if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
@@ -108,13 +109,13 @@ InterpretResult VM::run() {
         }
         break;
       }
-      case OP_SUBTRACT:BINARY_OP(NUMBER_VAL, -);
+      case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -);
         break;
-      case OP_MULTIPLE:BINARY_OP(NUMBER_VAL, *);
+      case OP_MULTIPLE: BINARY_OP(NUMBER_VAL, *);
         break;
-      case OP_DIVIDE:BINARY_OP(NUMBER_VAL, /);
+      case OP_DIVIDE: BINARY_OP(NUMBER_VAL, /);
         break;
-      case OP_NOT:push(BOOL_VAL(isFalsy(pop())));
+      case OP_NOT: push(BOOL_VAL(isFalsy(pop())));
         break;
       case OP_NOT_EQUAL: {
         Value b = pop();
@@ -129,9 +130,12 @@ InterpretResult VM::run() {
         }
         push(NUMBER_VAL(-AS_NUMBER(pop())));
         break;
-      case OP_RETURN: {
+      case OP_PRINT: {
         ValueArray::print(pop());
         printf("\n");
+        break;
+      }
+      case OP_RETURN: {
         return INTERPRET_OK;
       }
     }
@@ -181,12 +185,8 @@ void VM::concatenate() {
   ObjectString *b = AS_STRING(pop());
   ObjectString *a = AS_STRING(pop());
 
-  int length = a->length + b->length;
-  char *chars = new char[length + 1];
-  memcpy(chars, a->chars, a->length);
-  memcpy(chars + a->length, b->chars, b->length);
-  chars[length] = '\0';
+  std::string chars = a->chars + b->chars;
 
-  ObjectString *result = ObjectString::takeString(chars, length);
+  ObjectString *result = ObjectString::takeString(chars);
   push(OBJ_VAL(result));
 }

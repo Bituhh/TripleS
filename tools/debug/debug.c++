@@ -50,6 +50,8 @@ int Debug::disassembleInstruction(Chunk *chunk, int offset) {
       return Debug::simpleInstruction("OP_NOT_EQUAL", offset);
     case OP_NEGATE:
       return Debug::simpleInstruction("OP_NEGATE", offset);
+    case OP_PRINT:
+      return Debug::simpleInstruction("OP_PRINT", offset);
     case OP_RETURN:
       return Debug::simpleInstruction("OP_RETURN", offset);
     default:

@@ -1,16 +1,32 @@
 #include <cstring>
 #include "objectString.h"
+#include "../../vm/vm.h"
 
-ObjectString::ObjectString(char *chars, int length) : Object(OBJ_STRING), chars(chars), length(length) {
+ObjectString::ObjectString(const std::string &chars) : Object(OBJ_STRING), chars(chars), length(chars.size()) {
+  VM::getInstance().strings.insert({chars, this});
 }
 
-ObjectString *ObjectString::copy(const char *chars, int length) {
-  char *heapChars = new char[length + 1];
-  memcpy(heapChars, chars, length);
-  heapChars[length] = '\0';
-  return new ObjectString(heapChars, length);
+ObjectString *ObjectString::copy(std::string &chars) {
+  try {
+    ObjectString *interned = VM::getInstance().strings.at(chars);
+    return interned;
+  } catch (const std::out_of_range &e) {
+    char *heapChars = new char[chars.size() + 1];
+    chars.copy(heapChars, chars.size());
+    heapChars[chars.size()] = '\0';
+    return new ObjectString(heapChars);
+  }
 }
 
-ObjectString *ObjectString::takeString(char *chars, int length) {
-  return new ObjectString(chars, length);
+ObjectString *ObjectString::takeString(std::string &chars) {
+  try {
+    printf("take -> %s\n", chars.c_str());
+    ObjectString *interned = VM::getInstance().strings.at(chars);
+    printf("%s\n", interned->chars.c_str());
+    chars.clear();
+    chars.shrink_to_fit();
+    return interned;
+  } catch (const std::out_of_range &e) {
+    return new ObjectString(chars);
+  }
 }

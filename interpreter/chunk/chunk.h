@@ -22,6 +22,7 @@ typedef enum {
   OP_NOT,
   OP_NOT_EQUAL,
   OP_NEGATE,
+  OP_PRINT,
   OP_RETURN,
 } OpCode;
 
@@ -32,9 +33,7 @@ public:
   std::vector<uint8_t> code;
 
   Chunk();
-
   void write(uint8_t byte, int line);
-
   unsigned int addConstant(Value value);
 };
 

@@ -20,9 +20,7 @@ ObjectString *ObjectString::copy(std::string &chars) {
 
 ObjectString *ObjectString::takeString(std::string &chars) {
   try {
-    printf("take -> %s\n", chars.c_str());
     ObjectString *interned = VM::getInstance().strings.at(chars);
-    printf("%s\n", interned->chars.c_str());
     chars.clear();
     chars.shrink_to_fit();
     return interned;

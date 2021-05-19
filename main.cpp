@@ -1,50 +1,46 @@
 #include "interpreter/chunk/chunk.h"
 #include "tools/debug/debug.h"
 #include "interpreter/vm/vm.h"
+#include <fstream>
 
 static void repl() {
   auto &vm = VM::getInstance();
 
-  char line[1024];
-  for (;;) {
-    printf(">> ");
+  std::string line;
+  while (true) {
+    std::cout << ">> ";
+    std::cin >> line;
 
-    if (!fgets(line, sizeof(line), stdin)) {
-      printf("\n");
-      break;
-    }
+    if (line == "exit") break;
 
-    vm.interpret(line);
-  }
+    vm.interpret(line.c_str());
+  };
 
   vm.free();
 }
 
-static char *readFile(const char *path) {
-  FILE *file = fopen(path, "rb");
+static std::string readFile(const std::string &path) {
+  std::ifstream file(path);
+  if (!file.is_open()) std::cerr << "Couldn't open file \"" << path << "\"." << std::endl;
 
-  if (file == nullptr) {
-    fprintf(stderr, "Couldn't open file \"%s\".\n", path);
+  std::string allLines;
+  std::string line;
+  while (std::getline(file, line)) {
+    allLines += line + '\n';
   }
 
-  fseek(file, 0L, SEEK_END);
-  size_t fileSize = ftell(file);
-  rewind(file);
+  std::cout << allLines << std::endl;
 
-  char *buffer = (char *) malloc(fileSize + 1);
-  size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
-  buffer[bytesRead] = '\0';
+  file.close();
 
-  fclose(file);
-  return buffer;
+  return allLines;
 }
 
 static void runFile(const char *path) {
   auto &vm = VM::getInstance();
 
-  char *source = readFile(path);
-  InterpretResult result = vm.interpret(source);
-  free(source);
+  std::string source = readFile(path);
+  InterpretResult result = vm.interpret(source.c_str());
 
   if (result == INTERPRET_COMPILE_ERROR) exit(65);
   if (result == INTERPRET_RUNTIME_ERROR) exit(70);
@@ -53,7 +49,7 @@ static void runFile(const char *path) {
 }
 
 int main(int argc, const char *argv[]) {
-
+//
 //  if (argc == 1) {
 //    repl();
 //  } else {

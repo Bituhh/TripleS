@@ -26,7 +26,7 @@ bool Object::isObjType(Value value, ObjectType type) {
 void Object::print(Value value) {
   switch (OBJ_TYPE(value)) {
     case OBJ_STRING:
-      printf("%s", AS_CSTRING(value).c_str());
+      std::cout << AS_CSTRING(value);
       break;
   }
 }

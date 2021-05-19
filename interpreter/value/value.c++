@@ -1,15 +1,14 @@
-#include <cstring>
 #include "value.h"
 
 #include "../object/objectString/objectString.h"
 
 void ValueArray::print(Value value) {
   switch (value.type) {
-    case VAL_BOOL: printf(AS_BOOL(value) ? "true" : "false");
+    case VAL_BOOL: std::cout << (AS_BOOL(value) ? "true" : "false");
       break;
-    case VAL_NULL: printf("null");
+    case VAL_NULL: std::cout << "null";
       break;
-    case VAL_NUMBER: printf("%g", AS_NUMBER(value));
+    case VAL_NUMBER: std::cout << AS_NUMBER(value);
       break;
     case VAL_OBJ: Object::print(value);
       break;

@@ -2,6 +2,7 @@
 #define TRIPLES_VM_H
 
 #include <unordered_map>
+#include <iostream>
 #include "../chunk/chunk.h"
 #include "../../tools/debug/debug.h"
 #include "../compiler/compiler.h"
@@ -28,13 +29,17 @@ class VM {
   void push(Value value);
   Value peek(int i);
   Value pop();
-  void runtimeError(const char *format, ...);
+
+  template<typename... Args>
+  void runtimeError(Args... args);
+
   static bool isFalsy(Value pop);
   void concatenate();
 
  public:
   Object *objects;
   std::unordered_map<std::string , ObjectString *> strings;
+  std::unordered_map<ObjectString *, Value> globals;
 
   VM(const VM &) = delete;
   void free();

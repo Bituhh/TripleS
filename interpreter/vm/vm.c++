@@ -9,19 +9,32 @@ VM::VM() : chunk(new Chunk), instructionPointer(), stack(), stackTop(), objects(
 }
 
 void VM::free() {
-  delete chunk;
-  delete stackTop;
-  {
-    Object *object = objects;
-    while (object != nullptr) {
-      Object *next = object->next;
-      delete object;
-      object = next;
-    }
-  }
-  delete objects;
-  delete instructionPointer;
-  strings.clear();
+//  delete chunk;
+//  delete stackTop;
+//  {
+//    Object *object = objects;
+//    while (object != nullptr) {
+//      Object *next = object->next;
+//      delete object;
+//      object = next;
+//    }
+//  }
+//  delete objects;
+//  delete instructionPointer;
+//
+//  {
+//    for (auto &string: strings) {
+//      delete string.second;
+//    }
+//    strings.clear();
+//  }
+//
+//  {
+//    for (auto &global: globals) {
+//      delete global.first;
+//    }
+//    globals.clear();
+//  }
 }
 
 InterpretResult VM::interpret(const char *source) {
@@ -47,6 +60,7 @@ InterpretResult VM::interpret(const char *source) {
 InterpretResult VM::run() {
 #define READ_BYTE()     *instructionPointer++
 #define READ_CONSTANT() (chunk->constants.at(READ_BYTE()))
+#define READ_STRING()   AS_STRING(READ_CONSTANT())
 #define BINARY_OP(valueType, op)   do { \
     if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
       runtimeError("Operands must be numbers."); \
@@ -60,15 +74,15 @@ InterpretResult VM::run() {
 
   for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
-    printf("          ");
+    std::cout << "          ";
     for (Value *slot = stack; slot < stackTop; slot++) {
-      printf("[ ");
+      std::cout << "[ ";
       ValueArray::print(*slot);
-      printf(" ]");
+      std::cout << " ]";
     }
-    printf("\n");
+    std::cout << std::endl;
 
-    Debug::disassembleInstruction(chunk, (int) (instructionPointer - chunk->code.values));
+    Debug::disassembleInstruction(chunk, (int) (instructionPointer - chunk->code.data()));
 #endif
     switch (READ_BYTE()) {
       case OP_CONSTANT: {
@@ -82,6 +96,35 @@ InterpretResult VM::run() {
         break;
       case OP_FALSE: push(BOOL_VAL(false));
         break;
+      case OP_POP: pop();
+        break;
+      case OP_DEFINE_GLOBAL: {
+        ObjectString *name = READ_STRING();
+        VM::getInstance().globals.insert({name, peek(0)});
+        pop();
+        break;
+      }
+      case OP_GET_GLOBAL: {
+        ObjectString *name = READ_STRING();
+        try {
+          Value value = VM::getInstance().globals.at(name);
+          push(value);
+        } catch (std::out_of_range &e) {
+          runtimeError("Undefined variable '", name->chars, "'");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        break;
+      }
+      case OP_SET_GLOBAL: {
+        ObjectString *name = READ_STRING();
+        try {
+          VM::getInstance().globals.at(name) = peek(0);
+        } catch (std::out_of_range &e) {
+          runtimeError("Undefined variable '", name->chars, "'");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        break;
+      }
       case OP_EQUAL: {
         Value b = pop();
         Value a = pop();
@@ -132,7 +175,7 @@ InterpretResult VM::run() {
         break;
       case OP_PRINT: {
         ValueArray::print(pop());
-        printf("\n");
+        std::cout << std::endl;
         break;
       }
       case OP_RETURN: {
@@ -143,6 +186,7 @@ InterpretResult VM::run() {
 
 #undef BINARY_OP
 #undef READ_CONSTANT
+#undef READ_STRING
 #undef READ_BYTE
 }
 
@@ -164,16 +208,12 @@ Value VM::peek(int distance) {
   return stackTop[-1 - distance];
 }
 
-void VM::runtimeError(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  vfprintf(stderr, format, args);
-  va_end(args);
-  fputs("\n", stderr);
-
+template<typename... Args>
+void VM::runtimeError(Args... args) {
+  (std::cerr << ... << args);
   size_t instruction = instructionPointer - chunk->code.data() - 1;
   int line = chunk->lines.at(instruction);
-  fprintf(stderr, "[line %d] in script\n", line);
+  std::cerr << " at [line " << line << "] in script" << std::endl;
   reset();
 }
 

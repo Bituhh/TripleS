@@ -1,3 +1,4 @@
+#include <iostream>
 #include "compiler.h"
 
 Compiler::Compiler(const char *source) : scanner(new Scanner(source)), parser(), compilingChunk() {
@@ -45,7 +46,13 @@ void Compiler::consume(TokenType type, const char *message) {
 
 // Declaration
 void Compiler::declaration() {
-  statement();
+  if (match(TOKEN_VAR)) {
+    varDeclaration();
+  } else {
+    statement();
+  }
+
+  if (parser.panicMode) synchronize();
 }
 // Declaration
 
@@ -53,9 +60,19 @@ void Compiler::declaration() {
 void Compiler::statement() {
   if (match(TOKEN_PRINT)) {
     printStatement();
+  } else {
+    expressionStatement();
   }
 }
 // Statement
+
+// Expression Statement
+void Compiler::expressionStatement() {
+  expression();
+  consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
+  emitByte(OP_POP);
+}
+// Expression Statement
 
 // Expression
 void Compiler::expression() {
@@ -63,18 +80,13 @@ void Compiler::expression() {
 }
 // Expression
 
-// Number
-void Compiler::number() {
-  double value = strtod(parser.previous.start, nullptr);
-  emitConstant(NUMBER_VAL(value));
-}
 
 void Compiler::emitConstant(Value value) {
   emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
 uint8_t Compiler::makeConstant(Value value) {
-  int constant = currentChunk()->addConstant(value);
+  unsigned int constant = currentChunk()->addConstant(value);
   if (constant == UINT8_MAX) {
     error("Too many constants in one chunk.");
     return 0;
@@ -82,14 +94,6 @@ uint8_t Compiler::makeConstant(Value value) {
 
   return (uint8_t) constant;
 }
-// Number
-
-// Grouping
-void Compiler::grouping() {
-  expression();
-  consume(TOKEN_RIGHT_PAREN, "Expected ')' after expression.");
-}
-// Grouping
 
 // Unary
 void Compiler::unary() {
@@ -140,6 +144,20 @@ void Compiler::binary() {
 }
 // Binary
 
+// Number
+void Compiler::number() {
+  double value = strtod(parser.previous.start, nullptr);
+  emitConstant(NUMBER_VAL(value));
+}
+// Number
+
+// Grouping
+void Compiler::grouping() {
+  expression();
+  consume(TOKEN_RIGHT_PAREN, "Expected ')' after expression.");
+}
+// Grouping
+
 // Literal
 void Compiler::literal() {
   switch (parser.previous.type) {
@@ -161,20 +179,32 @@ void Compiler::string() {
 }
 // String
 
+// Variable
+void Compiler::variable(bool isAssignable) {
+  namedVariable(parser.previous, isAssignable);
+}
+// Variable
+
+
 void Compiler::parsePrecedence(Precedence precedence) {
+  // PRECEDENCE_ASSIGNMENT
   advance();
   ParserFnType prefixRuleType = getRule(parser.previous.type)->prefix;
   if (prefixRuleType == PARSER_FN_NONE) {
     error("Expect expression.");
     return;
   }
-
-  handleRule(prefixRuleType);
+  bool isAssignable = precedence <= PRECEDENCE_ASSIGNMENT;
+  handleRule(prefixRuleType, isAssignable);
 
   while (precedence <= getRule(parser.current.type)->precedence) {
     advance();
     ParserFnType infixRuleType = getRule(parser.previous.type)->infix;
-    handleRule(infixRuleType);
+    handleRule(infixRuleType, isAssignable);
+  }
+
+  if (isAssignable && match(TOKEN_EQUAL)) {
+    error("Invalid assignment target.");
   }
 }
 
@@ -215,17 +245,17 @@ void Compiler::error(const char *message) {
 void Compiler::errorAt(Token *token, const char *message) {
   if (parser.panicMode) return;
   parser.panicMode = true;
-  fprintf(stderr, "[Line %d] Error", token->line);
+  std::cerr << "[Line " << token->line << "] Error";
 
   if (token->type == TOKEN_EOF) {
-    fprintf(stderr, " at end");
+    std::cerr << " at end";
   } else if (token->type == TOKEN_ERROR) {
 
   } else {
-    fprintf(stderr, " at '%.*s'", token->length, token->start);
+    std::cerr << " at '" << std::basic_string<char>(token->start, token->length) << "'";
   }
 
-  fprintf(stderr, ": %s\n", message);
+  std::cerr << ": " << message << std::endl;
   parser.hasError = true;
 }
 
@@ -250,7 +280,7 @@ ParserRule *Compiler::getRule(TokenType type) {
     case TOKEN_GREATER_EQUAL: return new ParserRule{.prefix = PARSER_FN_NONE, .infix = PARSER_FN_BINARY, .precedence = PRECEDENCE_COMPARISON};
     case TOKEN_LESS: return new ParserRule{.prefix = PARSER_FN_NONE, .infix = PARSER_FN_BINARY, .precedence = PRECEDENCE_COMPARISON};
     case TOKEN_LESS_EQUAL: return new ParserRule{.prefix = PARSER_FN_NONE, .infix = PARSER_FN_BINARY, .precedence = PRECEDENCE_COMPARISON};
-    case TOKEN_IDENTIFIER: return new ParserRule{.prefix = PARSER_FN_NONE, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
+    case TOKEN_IDENTIFIER: return new ParserRule{.prefix = PARSER_FN_VARIABLE, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
     case TOKEN_STRING: return new ParserRule{.prefix = PARSER_FN_STRING, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
     case TOKEN_NUMBER: return new ParserRule{.prefix = PARSER_FN_NUMBER, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
     case TOKEN_AND: return new ParserRule{.prefix = PARSER_FN_NONE, .infix = PARSER_FN_NONE, .precedence = PRECEDENCE_NONE};
@@ -275,7 +305,7 @@ ParserRule *Compiler::getRule(TokenType type) {
   }
 }
 
-void Compiler::handleRule(ParserFnType type) {
+void Compiler::handleRule(ParserFnType type, bool isAssignable) {
   switch (type) {
     case PARSER_FN_UNARY: unary();
       break;
@@ -288,6 +318,8 @@ void Compiler::handleRule(ParserFnType type) {
     case PARSER_FN_LITERAL: literal();
       break;
     case PARSER_FN_STRING: string();
+      break;
+    case PARSER_FN_VARIABLE: variable(isAssignable);
       break;
     default:break;
   }
@@ -307,4 +339,62 @@ void Compiler::printStatement() {
   expression();
   consume(TOKEN_SEMICOLON, "Expected ';' after value.");
   emitByte(OP_PRINT);
+}
+
+void Compiler::synchronize() {
+  parser.panicMode = false;
+
+  while (parser.current.type != TOKEN_EOF) {
+    if (parser.previous.type == TOKEN_SEMICOLON) return;
+    switch (parser.current.type) {
+      case TOKEN_CLASS:
+      case TOKEN_FUNCTION:
+      case TOKEN_VAR:
+      case TOKEN_FOR:
+      case TOKEN_IF:
+      case TOKEN_WHILE:
+      case TOKEN_PRINT:
+      case TOKEN_RETURN:return;
+      default:; // Do nothing.
+    }
+
+    advance();
+  }
+}
+
+void Compiler::varDeclaration() {
+  uint8_t global = parseVariable("Expect variable name.");
+
+  if (match(TOKEN_EQUAL)) {
+    expression();
+  } else {
+    emitByte(OP_NULL);
+  }
+  consume(TOKEN_SEMICOLON, "Expected ';' after variable declaration.");
+
+  defineVariable(global);
+}
+
+uint8_t Compiler::parseVariable(const char *errorMessage) {
+  consume(TOKEN_IDENTIFIER, errorMessage);
+  return identifierConstant(&parser.previous);
+}
+
+void Compiler::defineVariable(uint8_t global) {
+  emitBytes(OP_DEFINE_GLOBAL, global);
+}
+
+uint8_t Compiler::identifierConstant(Token *name) {
+  std::string n = std::basic_string<char>(name->start, name->length);
+  return makeConstant(OBJ_VAL(ObjectString::copy(n)));
+}
+
+void Compiler::namedVariable(Token name, bool isAssignable) {
+  uint8_t arg = identifierConstant(&name);
+  if (isAssignable && match(TOKEN_EQUAL)) {
+    expression();
+    emitBytes(OP_SET_GLOBAL, arg);
+  } else {
+    emitBytes(OP_GET_GLOBAL, arg);
+  }
 }

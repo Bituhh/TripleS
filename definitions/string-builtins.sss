@@ -1,13 +1,13 @@
 // CONCATENATING
-'1234' + '5678'; // Return '12345678'.
-'1234'.join('5678'); // Return '12345678'.
-'1234'.join('5678', '90'); // Return '1234567890'.
-'1234'.concat('5678'); // Return '12345678'.
-'1234'.concat('5678', '90'); // Return '1234567890'.
-'1234'.concatenate('5678'); // Return '12345678'.
-'1234'.concatenate('5678', '90'); // Return '1234567890'.
-String.join('123', '456'); // Return '123456'.
-String.join('123', '456', '789'); // Return '123456789',
+'1234' + '5678'; // ReturnStmt '12345678'.
+'1234'.join('5678'); // ReturnStmt '12345678'.
+'1234'.join('5678', '90'); // ReturnStmt '1234567890'.
+'1234'.concat('5678'); // ReturnStmt '12345678'.
+'1234'.concat('5678', '90'); // ReturnStmt '1234567890'.
+'1234'.concatenate('5678'); // ReturnStmt '12345678'.
+'1234'.concatenate('5678', '90'); // ReturnStmt '1234567890'.
+String.join('123', '456'); // ReturnStmt '123456'.
+String.join('123', '456', '789'); // ReturnStmt '123456789',
 
 // INDEXING
 '123456789'[0]; // Returns '1'.
@@ -37,8 +37,8 @@ String.join('123', '456', '789'); // Return '123456789',
 '123456789'.slice(-2, 3); // Returns '678'.
 
 // CONVERSIONS
-'1234'.toNumber(); // Returns 1234 as a number.
-'Some string'.toNumber(); // ERROR! unable to convert string to number.
+'1234'.toArray(); // Returns 1234 as a number.
+'Some string'.toArray(); // ERROR! unable to convert string to number.
 '23/03/2011'.toDate(); // Returns Date object.
 'Some string'.toDate(); // ERROR! unable to convert string to number.
 

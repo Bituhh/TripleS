@@ -1,0 +1,83 @@
+{
+  parserClass="org.intellij.sdk.language.parser.SimpleParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="TripleS"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.intellij.sdk.language.psi"
+  psiImplPackage="org.intellij.sdk.language.psi.impl"
+
+  elementTypeHolderClass="org.intellij.sdk.language.psi.SimpleTypes"
+  elementTypeClass="org.intellij.sdk.language.psi.SimpleElementType"
+  tokenTypeClass="org.intellij.sdk.language.psi.SimpleTokenType"
+
+  tokens=[
+    SPACE='regexp:\s+'
+    IDENTIFIER="regexp:\p{Alpha}+"
+    COMMENTS="regexp://.*"
+    NUMBER="regexp:\d+(\.\d*)?"
+    STRING="regexp:'.*'"
+    BOOLEAN="regexp:true|false"
+  ]
+}
+
+program ::= declaration * <<eof>>
+
+declaration    ::= importDecl | classDecl | funDecl |  varDecl | exportDecl | statement ;
+
+exportDecl     ::= 'export' (classDecl | funDecl | varDecl);
+
+importDecl     ::= 'from' STRING 'import' IDENTIFIER (',' IDENTIFIER)* ';'
+classDecl      ::= "class" IDENTIFIER ( "extends" IDENTIFIER )? "{" function* "}" ;
+funDecl        ::= "function" function ;
+
+varDecl        ::= "var" IDENTIFIER ("=" expression)? ";" ;
+
+
+// Statements
+statement      ::= exprStmt
+               | forStmt
+               | ifStmt
+               | printStmt
+               | returnStmt
+               | whileStmt
+               | block ;
+
+exprStmt       ::= expression ";" ;
+forStmt        ::= "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression? ")" statement ;
+ifStmt         ::= "if" "(" expression ")" statement ( "else" statement )? ;
+printStmt      ::= "print" expression ";" ;
+returnStmt     ::= "return" expression? ";" ;
+whileStmt      ::= "while" "(" expression ")" statement ;
+block          ::= "{" declaration* "}" ;
+
+
+// Expression
+expression     ::= assignment ;
+
+assignment     ::= ( call "." )? IDENTIFIER "=" assignment
+               | logic_or ;
+
+logic_or       ::= logic_and ( "or" logic_and )* ;
+logic_and      ::= equality ( "and" equality )* ;
+equality       ::= comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     ::= term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term           ::= factor ( ( "-" | "+" ) factor )* ;
+factor         ::= unary ( ( "/" | "*" ) unary )* ;
+
+unary          ::= ( "!" | "-" ) unary | call ;
+call           ::= primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+
+primary        ::= "true" | "false" | "nil" | "this" | NUMBER | STRING | IDENTIFIER | arrowFun  | "(" expression ")" | "super" "." IDENTIFIER | map | array ;
+
+arrowFun       ::= ('(' (IDENTIFIER (',' IDENTIFIER)*)? ')')? "->" block;
+
+map_properties  ::= IDENTIFIER ':' expression
+map            ::= '{' map_properties? (',' map_properties)* '}'
+
+array ::= '[' expression? (',' expression)* ']'
+
+function       ::= IDENTIFIER "(" parameters? ")" block ;
+parameters     ::= IDENTIFIER ( "," IDENTIFIER )* ;
+arguments      ::= expression ( "," expression )* ;

@@ -1,0 +1,11 @@
+from './export-tests' import ExportedClass, person;
+
+var exported = ExportedClass();
+
+print exported.name;
+exported.name = 'exported';
+print exported.name;
+
+print person;
+person['name'] = 'James';
+print person;

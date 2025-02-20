@@ -5,7 +5,7 @@ Objects vs class
 
 All object parameters of an object are public.
 
-Class can have private and public properties, as well as getters and setters.
+ClassStmt can have private and public properties, as well as getters and setters.
 
 
 */
@@ -63,16 +63,16 @@ class ThirdPerson {
 
 
 const person1 = new FirstPerson('Victor', 'Coelho');
-print(person1.firstName); // Return 'Victor'
-print(person1.lastName); // Return 'Coelho'
+print(person1.firstName); // ReturnStmt 'Victor'
+print(person1.lastName); // ReturnStmt 'Coelho'
 
 const person2 = new SecondPerson('Adam', 'Silvester');
-print(person2.firstName); // Return 'Adam'
-print(person2.lastName); // Return 'Silvester'
+print(person2.firstName); // ReturnStmt 'Adam'
+print(person2.lastName); // ReturnStmt 'Silvester'
 
 const person3 = new ThirdPerson('Adam', 'Silvester');
-print(person3.firstName); // ERROR! firstName is a private property and can only be accessed inside the call.
-print(person3.lastName); // ERROR! lastName is a private property and can only be accessed inside the call.
+print(person3.firstName); // ERROR! firstName is a private property and can only be accessed inside the action.
+print(person3.lastName); // ERROR! lastName is a private property and can only be accessed inside the action.
 
 
 
@@ -99,5 +99,5 @@ class GetterPerson {
     this.lastName = lastName;
   }
 
-  get fullName -> this.firstName + ' ' + this.lastName;
+  _get fullName -> this.firstName + ' ' + this.lastName;
 }

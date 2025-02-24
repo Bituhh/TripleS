@@ -1,62 +1,55 @@
-#include "interpreter/chunk/chunk.h"
-#include "tools/debug/debug.h"
-#include "interpreter/vm/vm.h"
+#include "src/chunk.h"
+#include "src/compiler/compiler.h"
+#include "src/vm.h"
+
 #include <fstream>
+#include <iostream>
+#include <sstream>
 
-static void repl() {
-  auto &vm = VM::getInstance();
-
-  std::string line;
-  while (true) {
-    std::cout << ">> ";
-    std::cin >> line;
-
-    if (line == "exit") break;
-
-    vm.interpret(line.c_str());
-  };
-
-  vm.free();
+std::string readFile(std::string path) {
+  const std::ifstream t("C:/projects/TripleS/definitions/test.sss");
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  return buffer.str();
 }
 
-static std::string readFile(const std::string &path) {
-  std::ifstream file(path);
-  if (!file.is_open()) std::cerr << "Couldn't open file \"" << path << "\"." << std::endl;
+int main(const int argc, const char *argv[]) {
 
-  std::string allLines;
-  std::string line;
-  while (std::getline(file, line)) {
-    allLines += line + '\n';
-  }
+  // if (argc != 2) {
+  //   std::cout << "Usage: clox [path]" << std::endl;
+  //   return 64;
+  // }
 
-  std::cout << allLines << std::endl;
+  const std::string source = readFile("");
+  Chunk chunk;
 
-  file.close();
+  Compiler compiler(source, chunk);
+  compiler.compile();
 
-  return allLines;
-}
+  VM vm(chunk);
+  vm.interpret();
 
-static void runFile(const char *path) {
-  auto &vm = VM::getInstance();
+  // chunk.write(OP_CONSTANT, 123);
+  // chunk.write(chunk.addConstant(1.2), 123);
+  //
+  // chunk.write(OP_CONSTANT, 123);
+  // chunk.write(chunk.addConstant(3.4), 123);
+  //
+  // chunk.write(OP_ADD, 123); // 1.2 + 3.4 = 4.6
+  //
+  // chunk.write(OP_CONSTANT, 123);
+  // chunk.write(chunk.addConstant(5.6), 123);
+  //
+  // chunk.write(OP_DIVIDE, 123); // 4.6 / 5.6 = 0.82142857142
+  //
+  // chunk.write(OP_NEGATE, 123); // -1
+  //
+  // chunk.write(OP_RETURN, 123);
 
-  std::string source = readFile(path);
-  InterpretResult result = vm.interpret(source.c_str());
+  // VM vm(&chunk);
+  // vm.interpret();
 
-  if (result == INTERPRET_COMPILE_ERROR) exit(65);
-  if (result == INTERPRET_RUNTIME_ERROR) exit(70);
-
-  vm.free();
-}
-
-int main(int argc, const char *argv[]) {
-//
-//  if (argc == 1) {
-//    repl();
-//  } else {
-//    runFile(argv[1]);
-//  }
-
-  runFile("D:/usr/Victor/Documents/Projects/Cpp/triples/definitions/test.sss");
-
-  return 0;
+  // auto debug = Debug(&chunk);
+  // const std::string value = "test value";
+  // debug.disassembleChunk(&value);
 }
